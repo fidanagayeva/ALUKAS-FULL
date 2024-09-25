@@ -1,57 +1,26 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { FaCheck } from 'react-icons/fa';
 
-export const Filter = () => {
+export const Filter = ({ setSelectedSize }) => {
     const [showCollections, setShowCollections] = useState(true);
     const [showPrice, setShowPrice] = useState(true);
-    const [showMaterial, setShowMaterial] = useState(true);
-    const [showColor, setShowColor] = useState(true);
     const [showSize, setShowSize] = useState(true);
     const [showAvailability, setShowAvailability] = useState(true);
     const [showTags, setShowTags] = useState(true);
 
     const [price, setPrice] = useState(1570);
-    const [selectedColor, setSelectedColor] = useState(null);
-    const [selectedMaterial, setSelectedMaterial] = useState([]);
     const [selectedAvailability, setSelectedAvailability] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
-    const [selectedSize, setSelectedSize] = useState(''); 
-
-    useEffect(() => {
-        const fetchFilteredData = async () => {
-            const queryParams = new URLSearchParams();
-
-            if (selectedSize) queryParams.append('size', selectedSize);
-            if (selectedMaterial.length > 0) queryParams.append('material', selectedMaterial.join(','));
-            if (selectedColor) queryParams.append('color', selectedColor);
-
-            const response = await fetch(`http://localhost:3001/api/filter/cards?${queryParams.toString()}`);
-            const data = await response.json();
-            // Burada backend-dən gələn datanı işləyə bilərsiniz
-            console.log('Filtered products:', data);
-        };
-
-        fetchFilteredData();
-    }, [selectedSize, selectedMaterial, selectedColor]);
+    const sizes = ['S', 'M', 'L', '12' ,'14', '16'];
 
     const toggleCollections = () => setShowCollections(!showCollections);
     const togglePrice = () => setShowPrice(!showPrice);
-    const toggleMaterial = () => setShowMaterial(!showMaterial);
-    const toggleColor = () => setShowColor(!showColor);
     const toggleSize = () => setShowSize(!showSize);
     const toggleAvailability = () => setShowAvailability(!showAvailability);
     const toggleTags = () => setShowTags(!showTags);
-
-    const formatPrice = (value) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'decimal',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(value);
-    };
 
     const toggleSelection = (list, setList, item) => {
         setList((prev) =>
@@ -61,7 +30,15 @@ export const Filter = () => {
         );
     };
 
-    const colors = ['black', 'blue', 'yellow', 'green', 'red', 'gray', 'beige'];
+    const formatPrice = (value) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'decimal',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value);
+    };
+
+    const tags = ['Bags', 'Black', 'Blue', 'Fashion', 'Green', 'Men', 'Women'];
 
     return (
         <div className="w-64 p-4">
@@ -89,7 +66,7 @@ export const Filter = () => {
             <div>
                 <div className="flex justify-between items-center cursor-pointer" onClick={togglePrice}>
                     <span className="text-2xl font-serif">Price</span>
-                    <span>
+                    <span className={`transition-transform duration-300 ${showPrice ? 'rotate-180' : ''}`}>
                         {showPrice ? <FiChevronUp /> : <FiChevronDown />}
                     </span>
                 </div>
@@ -163,10 +140,10 @@ export const Filter = () => {
                 </div>
                 {showSize && (
                     <div className="mt-2 grid grid-cols-4 gap-2">
-                        {['S', 'M', 'L', '12', '14', '16'].map((size, index) => (
+                        {sizes.map((size, index) => (
                             <div
                                 key={index}
-                                className={`border border-gray-400 rounded-sm p-2 text-center cursor-pointer transition-all duration-200 hover:bg-black hover:text-white ${selectedSize === size ? 'bg-black text-white' : ''}`}
+                                className={`border border-gray-400 rounded-sm p-2 text-center cursor-pointer transition-all duration-200 hover:bg-black hover:text-white`}
                                 onClick={() => setSelectedSize(size)}
                             >
                                 {size}
@@ -210,7 +187,7 @@ export const Filter = () => {
                 </div>
                 {showTags && (
                     <ul className="mt-2 space-y-1 text-[1rem] font-serif text-gray-600">
-                        {['Bags', 'Black', 'Blue', 'Brand', 'Fashion', 'Gold', 'Green', 'Hat', 'Jewelry', 'Men', 'Mens', 'Modern', 'Rings', 'Shirts', 'Silver', 'Sweater', 'White', 'Women'].map((tag, index) => (
+                        {tags.map((tag, index) => (
                             <li key={index} className="flex items-center mb-2 cursor-pointer" onClick={() => toggleSelection(selectedTags, setSelectedTags, tag)}>
                                 <div className={`w-4 h-4 mr-2 border-[1px] ${selectedTags.includes(tag) ? 'bg-black' : 'bg-white'} border-gray-200 rounded-sm flex justify-center items-center`}>
                                     {selectedTags.includes(tag) && <FaCheck className="text-white" />}
@@ -226,7 +203,7 @@ export const Filter = () => {
 
             <div className="mt-4">
                 <a href="">
-                    <img src="https://cdn.shopify.com/s/files/1/0691/9307/2864/files/banner-shop.jpg?v=1711798181" alt="" className="w-full h-auto" />
+                    <img src="https://cdn.shopify.com/s/files/1/0691/9307/2864/files/banner-shop.jpg?v=1711798181" alt="Banner" className="w-full h-auto" />
                 </a>
             </div>
         </div>

@@ -23,7 +23,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = "http://localhost:3001/api/users"; // Ensure this URL matches your backend
+      const url = "http://localhost:3001/api/users"; 
       const response = await axios.post(url, data);
 
       if (response.status === 201) {
@@ -31,13 +31,13 @@ const Signup = () => {
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        // Handle server-side errors
+        // server-side errors
         setError(error.response.data.message);
       } else if (error.request) {
-        // Handle network errors
+        // network errors
         setError("No response from server. Please try again later.");
       } else {
-        // Handle other errors
+        // other errors
         setError("An error occurred. Please try again.");
       }
     }

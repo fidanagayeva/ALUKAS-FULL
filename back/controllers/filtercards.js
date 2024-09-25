@@ -1,4 +1,4 @@
-const Filter = require('../models/filter'); 
+const Filter = require('../models/filter');
 const mongoose = require('mongoose');
 
 exports.createFilterCard = async (req, res) => {
@@ -27,12 +27,22 @@ exports.createFilterCard = async (req, res) => {
 
 exports.getFilterCards = async (req, res) => {
     try {
-        const filterCards = await Filter.find();
+        const query = {};
+        if (req.query.size) {
+            query.size = req.query.size;
+        }
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const filterCards = await Filter.find(query).skip(skip).limit(limit);
         res.status(200).json(filterCards);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 exports.getFilterCardById = async (req, res) => {
     try {
@@ -90,3 +100,4 @@ exports.deleteFilterCard = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+

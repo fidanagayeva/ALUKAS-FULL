@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { Filter } from '../Filter'; 
 import { FaChevronLeft, FaChevronRight, FaTh, FaThLarge, FaList } from 'react-icons/fa';
 
 interface Product {
@@ -8,11 +9,9 @@ interface Product {
   name: string;
   brand: string;
   size: string;
-  minPrice?: number;
-  maxPrice?: number;
-  oldPrice?: number;
-  discount?: number;
+  price?: number;
   imageUrl: string;
+  discount?: number;
 }
 
 const SkeletonCard = () => (
@@ -30,32 +29,36 @@ export const FilterShop: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedSize, setSelectedSize] = useState<string>(''); 
+  const [currentPage, setCurrentPage] = useState<number>(1); 
   const [view, setView] = useState<'grid3' | 'grid2' | 'list'>('grid3'); 
   const [sortOption, setSortOption] = useState<'az' | 'za'>('az'); 
-  const productsPerPage = 8;
-  const totalProducts = products.length;
-
-  const totalPages = Math.ceil(totalProducts / productsPerPage);
-
+  const productsPerPage = 8; 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/filter/cards');
+        const queryParams = new URLSearchParams();
+        if (selectedSize) queryParams.append('size', selectedSize); 
+
+        queryParams.append('page', currentPage.toString()); 
+        queryParams.append('limit', productsPerPage.toString()); 
+
+        const response = await fetch(`http://localhost:3001/api/filter/cards?${queryParams.toString()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
+
         let data = await response.json();
 
         data = data.sort((a: Product, b: Product) => {
           if (sortOption === 'az') {
-            return a.name.localeCompare(b.name); 
+            return a.name.localeCompare(b.name);
           } else {
-            return b.name.localeCompare(a.name); 
+            return b.name.localeCompare(a.name);
           }
         });
 
-        setProducts(data);
+        setProducts(data); 
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -64,16 +67,13 @@ export const FilterShop: React.FC = () => {
     };
 
     fetchProducts();
-  }, [sortOption]); 
+  }, [selectedSize, currentPage, sortOption]); 
 
-  const currentProducts = products.slice(
-    (currentPage - 1) * productsPerPage,
-    currentPage * productsPerPage
-  );
+  const totalPages = Math.ceil(products.length / productsPerPage); 
 
-  const handlePageChange = (pageNumber: number) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage); 
     }
   };
 
@@ -97,11 +97,18 @@ export const FilterShop: React.FC = () => {
     return <p className="text-red-500 text-center">{error}</p>;
   }
 
-  return (
-    <div className="flex">
-      <div className="w-1/4 p-4"></div>
+  const currentProducts = products.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  );
 
-      <div className="p-6 w-3/4">
+  return (
+    <div className="flex justify-center">
+      <div className="w-1/4 p-4">
+        <Filter setSelectedSize={setSelectedSize} />
+      </div>
+
+      <div className="pl-24 p-6 w-3/4">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <span className="mr-2">Sort by: </span>
@@ -132,13 +139,13 @@ export const FilterShop: React.FC = () => {
             view === 'grid3'
               ? 'grid grid-cols-1 md:grid-cols-3 gap-4'
               : view === 'grid2'
-              ? 'grid grid-cols-1 md:grid-cols-2 gap-6' 
+              ? 'grid grid-cols-1 md:grid-cols-2 gap-6'
               : 'space-y-4'
           }
         >
           {currentProducts.map((product) => (
-            <div 
-              key={product._id} 
+            <div
+              key={product._id}
               className={`border-white relative overflow-hidden ${view === 'grid2' ? 'w-full h-[25rem]' : ''} ${view === 'list' ? 'w-full h-[30rem]' : ''}`}
             >
               {product.discount && (
@@ -157,19 +164,10 @@ export const FilterShop: React.FC = () => {
                 <p className="text-sm text-gray-600">{product.brand}</p>
                 <h3 className="text-lg font-sans">{product.name}</h3>
                 <div className="mt-2">
-                  {product.minPrice !== undefined && (
-                    <span className="text-xl font-sans text-black">
-                      ${product.minPrice.toFixed(2)}
-                    </span>
-                  )}
-                  {product.maxPrice && (
-                    <span className="text-gray-500 text-sm ml-2">
-                      - ${product.maxPrice.toFixed(2)}
-                    </span>
-                  )}
-                  {product.oldPrice && (
+                  <span className="text-xl font-sans text-black">{product.price?.toFixed(2)}</span>
+                  {product.discount && (
                     <span className="text-gray-500 text-sm line-through ml-2">
-                      ${product.oldPrice.toFixed(2)}
+                      ${(product.price! * (1 + product.discount / 100)).toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -186,17 +184,17 @@ export const FilterShop: React.FC = () => {
           >
             <FaChevronLeft />
           </button>
+
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               key={index + 1}
               onClick={() => handlePageChange(index + 1)}
-              className={`px-3 py-1 border ${
-                currentPage === index + 1 ? 'border-black' : 'border-white'
-              } hover:border-black`}
+              className={`px-3 py-1 border ${currentPage === index + 1 ? 'border-black' : 'border-white'} hover:border-black`}
             >
               {index + 1}
             </button>
           ))}
+
           <button
             className="px-3 py-1 bg-white hover:border-black hover:border"
             onClick={() => handlePageChange(currentPage + 1)}

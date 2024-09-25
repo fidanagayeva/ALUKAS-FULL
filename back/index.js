@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const connection = require("./db"); // Assuming you have a connection setup in db.js
+const connection = require("./db"); 
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/auth");
 const cardRoutes = require("./routes/card");

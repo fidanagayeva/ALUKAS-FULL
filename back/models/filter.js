@@ -6,10 +6,10 @@ const filterSchema = new mongoose.Schema({
     size: { type: String }, 
     availability: { type: Boolean }, 
     tags: [String], 
-   gender: { type: String }, 
+    gender: { type: String }, 
     price: { type: Number }, 
     name: { type: String }, 
-    imageUrl: { type: String } 
+    imageUrl: { type: String }
 });
 
 filterSchema.statics.filterProducts = async function (filters) {
@@ -32,7 +32,7 @@ filterSchema.statics.filterProducts = async function (filters) {
     }
 
     if (filters.tags && filters.tags.length > 0) {
-        query.tags = { $in: filters.tags }; 
+        query.tags = { $in: filters.tags };
     }
 
     if (filters.gender) {
@@ -42,19 +42,19 @@ filterSchema.statics.filterProducts = async function (filters) {
     if (filters.minPrice || filters.maxPrice) {
         query.price = {};
         if (filters.minPrice) {
-            query.price.$gte = filters.minPrice; 
+            query.price.$gte = filters.minPrice;
         }
         if (filters.maxPrice) {
-            query.price.$lte = filters.maxPrice; 
+            query.price.$lte = filters.maxPrice;
         }
     }
 
     if (filters.name) {
-        query.name = { $regex: filters.name, $options: 'i' }; 
+        query.name = { $regex: filters.name, $options: 'i' };
     }
 
     if (filters.imageUrl) {
-        query.imageUrl = { $regex: filters.imageUrl, $options: 'i' }; 
+        query.imageUrl = { $regex: filters.imageUrl, $options: 'i' };
     }
 
     const products = await mongoose.model('Product').find(query);
