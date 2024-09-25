@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FiChevronDown, FiChevronUp } from 'react-icons/fi'; 
-import { FaCheck } from 'react-icons/fa'; 
+import React, { useEffect, useState } from 'react';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FaCheck } from 'react-icons/fa';
 
 export const Filter = () => {
     const [showCollections, setShowCollections] = useState(true);
@@ -13,11 +13,29 @@ export const Filter = () => {
     const [showAvailability, setShowAvailability] = useState(true);
     const [showTags, setShowTags] = useState(true);
 
-    const [price, setPrice] = useState(1570); 
+    const [price, setPrice] = useState(1570);
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedMaterial, setSelectedMaterial] = useState([]);
     const [selectedAvailability, setSelectedAvailability] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
+    const [selectedSize, setSelectedSize] = useState(''); 
+
+    useEffect(() => {
+        const fetchFilteredData = async () => {
+            const queryParams = new URLSearchParams();
+
+            if (selectedSize) queryParams.append('size', selectedSize);
+            if (selectedMaterial.length > 0) queryParams.append('material', selectedMaterial.join(','));
+            if (selectedColor) queryParams.append('color', selectedColor);
+
+            const response = await fetch(`http://localhost:3001/api/filter/cards?${queryParams.toString()}`);
+            const data = await response.json();
+            // Burada backend-dən gələn datanı işləyə bilərsiniz
+            console.log('Filtered products:', data);
+        };
+
+        fetchFilteredData();
+    }, [selectedSize, selectedMaterial, selectedColor]);
 
     const toggleCollections = () => setShowCollections(!showCollections);
     const togglePrice = () => setShowPrice(!showPrice);
@@ -136,52 +154,6 @@ export const Filter = () => {
 
             <hr className="my-4" />
 
-            <div className="mt-4">
-                <div className="flex justify-between items-center cursor-pointer" onClick={toggleMaterial}>
-                    <span className="text-2xl font-serif">Material</span>
-                    <span className={`transition-transform duration-300 ${showMaterial ? 'rotate-180' : ''}`}>
-                        {showMaterial ? <FiChevronUp /> : <FiChevronDown />}
-                    </span>
-                </div>
-                {showMaterial && (
-                    <ul className="mt-2 space-y-1 text-[1rem] font-serif text-gray-600">
-                        {['Bronze', 'Gold', 'Silver'].map((material, index) => (
-                            <li key={index} className="flex items-center mb-2 cursor-pointer" onClick={() => toggleSelection(selectedMaterial, setSelectedMaterial, material)}>
-                                <div className={`w-4 h-4 mr-2 border-[1px] ${selectedMaterial.includes(material) ? 'bg-black' : 'bg-white'} border-gray-200 rounded-sm flex justify-center items-center`}>
-                                    {selectedMaterial.includes(material) && <FaCheck className="text-white" />}
-                                </div>
-                                {material} <span className="ml-auto">({index + 2})</span> 
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-
-            <hr className="my-4" />
-
-            <div>
-                <div className="flex justify-between items-center cursor-pointer" onClick={toggleColor}>
-                    <span className="text-2xl font-serif">Color</span>
-                    <span className={`transition-transform duration-300 ${showColor ? 'rotate-180' : ''}`}>
-                        {showColor ? <FiChevronUp /> : <FiChevronDown />}
-                    </span>
-                </div>
-                {showColor && (
-                    <div className="mt-2 flex space-x-2">
-                        {colors.map((color, index) => (
-                            <div
-                                key={index}
-                                className={`w-[3rem] h-[1.55rem] rounded-full cursor-pointer ${selectedColor === color ? 'border-2 border-black' : 'border-2 border-transparent'}`}
-                                style={{ backgroundColor: color }}
-                                onClick={() => setSelectedColor(color)}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            <hr className="my-4" />
-
             <div>
                 <div className="flex justify-between items-center cursor-pointer" onClick={toggleSize}>
                     <span className="text-2xl font-serif">Size</span>
@@ -194,7 +166,8 @@ export const Filter = () => {
                         {['S', 'M', 'L', '12', '14', '16'].map((size, index) => (
                             <div
                                 key={index}
-                                className="border border-gray-400 rounded-sm p-2 text-center cursor-pointer transition-all duration-200 hover:bg-black hover:text-white"
+                                className={`border border-gray-400 rounded-sm p-2 text-center cursor-pointer transition-all duration-200 hover:bg-black hover:text-white ${selectedSize === size ? 'bg-black text-white' : ''}`}
+                                onClick={() => setSelectedSize(size)}
                             >
                                 {size}
                             </div>
@@ -219,7 +192,7 @@ export const Filter = () => {
                                 <div className={`w-4 h-4 mr-2 border-[1px] ${selectedAvailability.includes(availability) ? 'bg-black' : 'bg-white'} border-gray-200 rounded-sm flex justify-center items-center`}>
                                     {selectedAvailability.includes(availability) && <FaCheck className="text-white" />}
                                 </div>
-                                {availability} <span className="ml-auto">({index === 0 ? 45 : 6})</span> 
+                                {availability} <span className="ml-auto">({index === 0 ? 45 : 6})</span>
                             </li>
                         ))}
                     </ul>
@@ -242,7 +215,7 @@ export const Filter = () => {
                                 <div className={`w-4 h-4 mr-2 border-[1px] ${selectedTags.includes(tag) ? 'bg-black' : 'bg-white'} border-gray-200 rounded-sm flex justify-center items-center`}>
                                     {selectedTags.includes(tag) && <FaCheck className="text-white" />}
                                 </div>
-                                {tag} <span className="ml-auto">({Math.floor(Math.random() * 30) + 1})</span> 
+                                {tag} <span className="ml-auto">({Math.floor(Math.random() * 30) + 1})</span>
                             </li>
                         ))}
                     </ul>

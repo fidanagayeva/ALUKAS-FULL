@@ -7,6 +7,7 @@ interface Product {
   _id: string;
   name: string;
   brand: string;
+  size: string;
   minPrice?: number;
   maxPrice?: number;
   oldPrice?: number;
