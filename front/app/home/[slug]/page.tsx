@@ -114,14 +114,14 @@ export default function DetailPage() {
                                 className="w-[35rem] h-[35rem] transition-opacity duration-500"
                                 onMouseMove={handleMouseMove}
                                 onMouseLeave={handleMouseLeave}
+                                style={{ cursor: 'none' }}
                             />
                             <div
-                                className="absolute w-[9rem] h-[9rem] rounded-full bg-no-repeat bg-cover border-2 shadow-2xl overflow-hidden"
+                                className="absolute w-[9rem] h-[9rem] rounded-full bg-no-repeat bg-cover border-2 shadow-2xl overflow-hidden pointer-events-none"
                                 style={{
                                     ...zoomStyle,
                                     backgroundImage: `url(${selectedImage || productDetail.image1})`,
                                     backgroundSize: '700%',
-                                    pointerEvents: 'none',
                                 }}
                             />
                         </div>

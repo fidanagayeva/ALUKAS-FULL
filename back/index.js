@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const connection = require("./db");
+const connection = require("./db"); // Assuming you have a connection setup in db.js
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/auth");
 const cardRoutes = require("./routes/card");
@@ -9,11 +9,12 @@ const trendyRoutes = require("./routes/trendy");
 const autumnRoutes = require("./routes/autumn"); 
 const featuredRoutes = require("./routes/featured"); 
 const contactRoutes = require("./routes/contact"); 
+const filterRoutes = require("./routes/filter"); 
 
 const app = express();
 const path = require("path");
 
-connection();
+connection(); 
 
 app.use(express.json());
 app.use(cors());
@@ -26,6 +27,7 @@ app.use("/api/trendy", trendyRoutes);
 app.use("/api/autumn", autumnRoutes); 
 app.use("/api/featured", featuredRoutes); 
 app.use("/api/contacts", contactRoutes); 
+app.use("/api/filter", filterRoutes); 
 
 const port = process.env.PORT || 3001; 
 app.listen(port, () => console.log(`Server running on port ${port}`));
